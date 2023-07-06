@@ -36,7 +36,7 @@ public class CreateOrderTest {
     @Test
     @DisplayName("Создание заказа авторизованным пользователем")
     public void createOrderTest() {
-        getIngredientList();
+        order = new Order(getIngredientList());
         ValidatableResponse responseReg = userApi.userReg(user);
         authToken = responseReg.extract().path("accessToken");
         UserAPI.userLogin(user);
@@ -50,7 +50,7 @@ public class CreateOrderTest {
     @Test
     @DisplayName("Создание заказа неавторизованным пользователем")
     public void createOrderWithoutAuthTest() {
-        getIngredientList();
+        order = new Order(getIngredientList());
         ValidatableResponse responseCreateOrder = OrderAPI.createOrderWithoutAuth(order);
         responseCreateOrder
                 .assertThat()
@@ -75,7 +75,7 @@ public class CreateOrderTest {
     @Test
     @DisplayName("Создание заказа c неверным хешем ингредиентов авторизованным пользователем")
     public void createOrderWithWrongHashIngredientTest() {
-        getWrongIngredientList();
+        order = new Order(getWrongIngredientList());
         ValidatableResponse responseReg = userApi.userReg(user);
         authToken = responseReg.extract().path("accessToken");
         ValidatableResponse responseCreateOrder = OrderAPI.createOrder(order, authToken);
@@ -84,7 +84,7 @@ public class CreateOrderTest {
                 .statusCode(SC_INTERNAL_SERVER_ERROR);
     }
 
-    private void getIngredientList() {
+    private List<String> getIngredientList() {
         ValidatableResponse validatableResponse = OrderAPI.getAllIngredients();
         List<String> list = validatableResponse.extract().path("data._id");
         List<String> ingredients = order.getIngredients();
@@ -92,9 +92,10 @@ public class CreateOrderTest {
         ingredients.add(list.get(2));
         ingredients.add(list.get(4));
         ingredients.add(list.get(0));
+        return ingredients;
     }
 
-    private void getWrongIngredientList() {
+    private List<String> getWrongIngredientList() {
         ValidatableResponse validatableResponse = OrderAPI.getAllIngredients();
         List<String> list = validatableResponse.extract().path("data._id");
         List<String> ingredients = order.getIngredients();
@@ -102,5 +103,6 @@ public class CreateOrderTest {
         ingredients.add(list.get(2).repeat(2));
         ingredients.add(list.get(4).repeat(1));
         ingredients.add(list.get(0));
+        return ingredients;
     }
 }
